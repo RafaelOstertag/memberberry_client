@@ -26,11 +26,12 @@ dependencies:
 
   oauth2_client: ^1.5.0
   provider: ^4.3.2
-  firebase_core: "0.5.2+1"
-  firebase_messaging: "^8.0.0-dev.9"
+  firebase_core: "0.5.3"
+  firebase_messaging: "^8.0.0-dev.11"
   flutter_local_notifications: ^3.0.1+7
   synchronized: ^2.2.0+2
   intl: ^0.16.1
+  flutter_datetime_picker: ^1.4.0
 
 dev_dependencies:
   flutter_test:

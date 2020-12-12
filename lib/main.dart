@@ -5,8 +5,8 @@ import 'package:memberberry_client/helpers/FCM_token.dart';
 import 'package:memberberry_client/helpers/http_client.dart';
 import 'package:memberberry_client/helpers/local_notification.dart';
 import 'package:memberberry_client/screens/berry_list.dart';
+import 'package:memberberry_client/screens/existing_berry.dart';
 import 'package:memberberry_client/screens/new_berry.dart';
-import 'package:memberberry_client/screens/show_berry.dart';
 import 'package:memberberry_client/screens/startup/loading.dart';
 import 'package:memberberry_client/screens/startup/start_error.dart';
 import 'package:provider/provider.dart';
@@ -127,7 +127,7 @@ class MemberBerryApp extends StatelessWidget {
             routes: {
               '/': (context) => BerryList(),
               '/new': (context) => NewBerry(),
-              ShowBerry.routeName: (context) => ShowBerry(),
+              ExistingBerry.routeName: (context) => ExistingBerry(),
             }));
   }
 }

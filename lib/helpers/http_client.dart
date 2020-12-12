@@ -50,54 +50,74 @@ class HttpClient {
 
   Future<http.Response> putToken(String token) async {
     return await _lock.synchronized(() async {
-      var httpClient = http.Client();
-
-      var headers = Map<String, String>();
-
-      http.Response resp;
-
-      var tknResp = await _oAuth2Helper.getToken();
-      var url = 'https://memberberry.guengel.ch/v1/me/fcm-token';
       var body = {"token": token};
-
-      try {
-        headers['Authorization'] = 'Bearer ' + tknResp.accessToken;
-        headers['Content-Type'] = 'application/json';
-        resp =
-            await httpClient.put(url, body: jsonEncode(body), headers: headers);
-
-        if (resp.statusCode == 401) {
-          if (tknResp.hasRefreshToken()) {
-            tknResp = await _oAuth2Helper.refreshToken(tknResp.refreshToken);
-          } else {
-            tknResp = await _oAuth2Helper.fetchToken();
-          }
-
-          if (tknResp != null) {
-            headers['Authorization'] = 'Bearer ' + tknResp.accessToken;
-            resp = await httpClient.put(url, body: body, headers: headers);
-          }
-        }
-        return resp;
-      } catch (e) {
-        rethrow;
-      }
+      return await _put('https://memberberry.guengel.ch/v1/me/fcm-token', body);
     });
   }
 
-  Future<http.Response> createBerry(String subject, String period) async {
+  Future<http.Response> _put(String url, Map<String, String> body) async {
+    var httpClient = http.Client();
+
     var headers = Map<String, String>();
-    headers['Content-Type'] = 'application/json';
+
+    http.Response resp;
+
+    var tknResp = await _oAuth2Helper.getToken();
+
+    try {
+      var headers = {
+        'Authorization': 'Bearer ' + tknResp.accessToken,
+        'Content-Type': 'application/json'
+      };
+
+      resp =
+          await httpClient.put(url, body: jsonEncode(body), headers: headers);
+
+      if (resp.statusCode == 401) {
+        if (tknResp.hasRefreshToken()) {
+          tknResp = await _oAuth2Helper.refreshToken(tknResp.refreshToken);
+        } else {
+          tknResp = await _oAuth2Helper.fetchToken();
+        }
+
+        if (tknResp != null) {
+          headers['Authorization'] = 'Bearer ' + tknResp.accessToken;
+          resp = await httpClient.put(url, body: body, headers: headers);
+        }
+      }
+      return resp;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<http.Response> createBerry(
+      String subject, DateTime firstExecution, String period) async {
+    var headers = {'Content-Type': 'application/json'};
 
     var body = Map<String, String>();
     body['subject'] = subject;
     body['period'] = period;
+    body['firstExecution'] = firstExecution.toUtc().toIso8601String();
 
     return await _lock.synchronized(() async {
       return await _oAuth2Helper.post(
           'https://memberberry.guengel.ch/v1/berries',
           headers: headers,
           body: jsonEncode(body));
+    });
+  }
+
+  Future<http.Response> updateBerry(String berryId, String subject,
+      DateTime firstExecution, String period) async {
+    return await _lock.synchronized(() async {
+      var body = Map<String, String>();
+      body['subject'] = subject;
+      body['period'] = period;
+      body['firstExecution'] = firstExecution.toUtc().toIso8601String();
+
+      return await _put(
+          'https://memberberry.guengel.ch/v1/berries/$berryId', body);
     });
   }
 }

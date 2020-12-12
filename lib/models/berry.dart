@@ -38,13 +38,28 @@ class BerryModel extends ChangeNotifier {
         .then((_) => notifyListeners());
   }
 
-  void create(String subject, String period) async {
-    await _httpClient.createBerry(subject, period).then((response) {
+  void create(String subject, DateTime firstExecution, String period) async {
+    await _httpClient
+        .createBerry(subject, firstExecution, period)
+        .then((response) {
       var newBerryUri = response.headers['location'];
       return _httpClient.loadBerry(newBerryUri);
     }).then((http.Response response) {
       var newBerry = Berry.fromJson(jsonDecode(response.body));
       _berryList.add(newBerry);
+      notifyListeners();
+    });
+  }
+
+  void update(
+      int index, String subject, DateTime firstExecution, String period) async {
+    var berry = _berryList[index];
+    await _httpClient
+        .updateBerry(berry.id, subject, firstExecution, period)
+        .then((http.Response response) {
+      var updatedBerry =
+          Berry(berry.id, subject, firstExecution, berry.lastExecution, period);
+      _berryList[index] = updatedBerry;
       notifyListeners();
     });
   }

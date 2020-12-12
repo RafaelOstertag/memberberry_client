@@ -1,29 +1,49 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:memberberry_client/models/berry.dart';
 import 'package:provider/provider.dart';
 
-class NewBerry extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => _NewBerry();
+class ShowBerryArguments {
+  final int berryIndex;
+
+  ShowBerryArguments(this.berryIndex);
 }
 
-class _NewBerry extends State<NewBerry> {
+class ExistingBerry extends StatefulWidget {
+  static const routeName = '/existing-berry';
+
+  @override
+  State<StatefulWidget> createState() => _ExistingBerry();
+}
+
+class _ExistingBerry extends State<ExistingBerry> {
   final _subjectController = TextEditingController();
-  DateTime _firstExecution = DateTime.now().add(new Duration(days: 1));
-  String _period = "DAILY";
+  DateTime _nextExecution;
+  String _period;
 
   @override
   Widget build(BuildContext context) {
+    final ShowBerryArguments args = ModalRoute.of(context).settings.arguments;
+
     return Consumer<BerryModel>(builder: (context, berryModel, child) {
-      return _scaffold(berryModel, context);
+      var existingBerry = berryModel.get(args.berryIndex);
+      _subjectController.text = existingBerry.subject;
+      if (_nextExecution == null) {
+        _nextExecution = existingBerry.nextExecution;
+      }
+      if (_period == null) {
+        _period = existingBerry.period;
+      }
+
+      return _scaffold(berryModel, args.berryIndex, context);
     });
   }
 
-  Scaffold _scaffold(BerryModel berryModel, BuildContext context) {
+  Scaffold _scaffold(
+      BerryModel berryModel, int berryIndex, BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('New Berry')),
+        appBar: AppBar(title: Text('Berry')),
         body: SafeArea(
             child: ListView(
           padding: EdgeInsets.symmetric(horizontal: 24.0),
@@ -35,7 +55,7 @@ class _NewBerry extends State<NewBerry> {
             ),
             SizedBox(height: 12.0),
             ListTile(
-                title: Text(_firstExecution.toIso8601String()),
+                title: Text(_nextExecution.toIso8601String()),
                 subtitle: Text("Next execution"),
                 trailing: FlatButton(
                     onPressed: () {
@@ -44,7 +64,7 @@ class _NewBerry extends State<NewBerry> {
                           minTime: DateTime.now(),
                           maxTime: DateTime.now().add(new Duration(days: 400)),
                           onConfirm: (date) {
-                        _firstExecution = date;
+                        setState(() => _nextExecution = date);
                       }, currentTime: DateTime.now());
                     },
                     child:
@@ -82,7 +102,6 @@ class _NewBerry extends State<NewBerry> {
                   child: Text('CANCEL'),
                   onPressed: () {
                     setState(() => _subjectController.clear());
-                    setState(() => _firstExecution = null);
                     setState(() => _period = "'DAILY");
                     Navigator.pop(context);
                   },
@@ -90,9 +109,8 @@ class _NewBerry extends State<NewBerry> {
                 RaisedButton(
                   child: Text('SAVE'),
                   onPressed: () {
-                    berryModel.create(
-                        _subjectController.value.text, _firstExecution,
-                        _period);
+                    berryModel.update(berryIndex, _subjectController.value.text,
+                        _nextExecution, _period);
                     Navigator.pop(context);
                   },
                 ),

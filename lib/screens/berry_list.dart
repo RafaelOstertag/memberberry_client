@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:memberberry_client/models/berry.dart';
-import 'package:memberberry_client/screens/show_berry.dart';
+import 'package:memberberry_client/screens/existing_berry.dart';
 import 'package:provider/provider.dart';
 
 class BerryList extends StatelessWidget {
@@ -42,7 +42,7 @@ class _BerryList extends StatelessWidget {
               subtitle: Text(berries.list[index].period +
                   ", " +
                   _getNextExecutionDate(berries.list[index])),
-              onTap: () => Navigator.pushNamed(context, ShowBerry.routeName,
+          onTap: () => Navigator.pushNamed(context, ExistingBerry.routeName,
                   arguments: ShowBerryArguments(index)),
             ));
   }
