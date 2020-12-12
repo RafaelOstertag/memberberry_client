@@ -41,8 +41,8 @@ class _NewBerry extends State<NewBerry> {
                     onPressed: () {
                       DatePicker.showDateTimePicker(context,
                           showTitleActions: true,
-                          minTime: DateTime.now(),
-                          maxTime: DateTime.now().add(new Duration(days: 400)),
+                          minTime: DateTime.now().add(Duration(days: -2)),
+                          maxTime: DateTime.now().add(Duration(days: 400)),
                           onConfirm: (date) {
                         _firstExecution = date;
                       }, currentTime: DateTime.now());
